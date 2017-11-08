@@ -1,4 +1,3 @@
-# coding: utf-8
 import nltk
 
 #nltk.download()
@@ -9,7 +8,7 @@ base = [('eu sou admirada por muitos','alegria'),
         ('estou me sentindo muito animado novamente','alegria'),
         ('eu estou muito bem hoje','alegria'),
         ('que belo dia para dirigir um carro novo','alegria'),
-        ('o dia está muito bonito','alegria'),
+        ('o dia esta muito bonito','alegria'),
         ('estou contente com o resultado do teste que fiz no dia de ontem','alegria'),
         ('o amor e lindo','alegria'),
         ('nossa amizade e amor vai durar para sempre', 'alegria'),
@@ -24,7 +23,6 @@ base = [('eu sou admirada por muitos','alegria'),
         ('eu tenho muito medo dele', 'medo'),
         ('estou com medo do resultado dos meus testes', 'medo')]
 
-#print(base[1])
 
 basetreinamento = [
 
@@ -401,37 +399,36 @@ baseteste =[
 ('foi terrível o tigre quase o matou','medo'),
 ('me advertiram sobre isso','medo')]
 
-
-stopwords = ['a', 'agora', 'algum', 'alguma', 'aquele', 'aqueles', 'de', 'deu', 'do', 'e', 'estou', 'esta', 'esta',
-             'ir', 'meu', 'muito', 'mesmo', 'no', 'nossa', 'o', 'outro', 'para', 'que', 'sem', 'talvez', 'tem', 'tendo',
-             'tenha', 'teve', 'tive', 'todo', 'um', 'uma', 'umas', 'uns', 'vou']
+# Pré-processamento dos dados
 
 stopwordsnltk = nltk.corpus.stopwords.words('portuguese')
 stopwordsnltk.append('vou')
 stopwordsnltk.append('tão')
-#print(stopwordsnltk)
 
+# Função para remover stop words
 def removestopwords(texto):
     frases = []
     for (palavras, emocao) in texto:
-        semstop = [p for p in palavras.split() if p not in stopwordsnltk]
-        frases.append((semstop, emocao))
+        withoutstopword = [p for p in palavras.split() if p not in stopwordsnltk]
+        frases.append((withoutstopword, emocao))
     return frases
 
 #print(removestopwords(base))
 
+# Função para aplicar stemmer
 def aplicastemmer(texto):
-    stemmer = nltk.stem.RSLPStemmer()
-    frasessstemming = []
+    stemmer = nltk.stem.RSLPStemmer() #Stemmer utilizado para a lingua portuguesa
+    frasesstemming = []
     for (palavras, emocao) in texto:
-        comstemming = [str(stemmer.stem(p)) for p in palavras.split() if p not in stopwordsnltk]
-        frasessstemming.append((comstemming, emocao))
-    return frasessstemming
+        withstemming = [str(stemmer.stem(p)) for p in palavras.split() if p not in stopwordsnltk]
+        frasesstemming.append((withstemming, emocao))
+    return frasesstemming
 
 frasescomstemmingtreinamento = aplicastemmer(basetreinamento)
 frasescomstemmingteste = aplicastemmer(baseteste)
 #print(frasescomstemming)
 
+# Função para buscar as palavras (base de dados) sem as emoções (classes)
 def buscapalavras(frases):
     todaspalavras = []
     for (palavras, emocao) in frases:
@@ -442,6 +439,7 @@ palavrastreinamento = buscapalavras(frasescomstemmingtreinamento)
 palavrasteste = buscapalavras(frasescomstemmingteste)
 #print(palavras)
 
+# Função para buscar a frequência que as palavras aparecem
 def buscafrequencia(palavras):
     palavras = nltk.FreqDist(palavras)
     return palavras
@@ -450,6 +448,7 @@ frequenciatreinamento = buscafrequencia(palavrastreinamento)
 frequenciateste = buscafrequencia(palavrasteste)
 #print(frequencia.most_common(50))
 
+# Função para buscar palavras que aparecem apenas uma vez
 def buscapalavrasunicas(frequencia):
     freq = frequencia.keys()
     return freq
@@ -458,29 +457,38 @@ palavrasunicastreinamento = buscapalavrasunicas(frequenciatreinamento)
 palavrasunicasteste = buscapalavrasunicas(frequenciateste)
 #print(palavrasunicastreinamento)
 
-#print(palavrasunicas)
-
+# Função para extrair palavras
 def extratorpalavras(documento):
     doc = set(documento)
     caracteristicas = {}
     for palavras in palavrasunicastreinamento:
-        caracteristicas['%s' % palavras] = (palavras in doc)
+        caracteristicas['%s' %palavras] = (palavras in doc)
     return caracteristicas
 
-caracteristicasfrase = extratorpalavras(['am', 'nov', 'dia'])
-#print(caracteristicasfrase)
+caracteristicasfrases = extratorpalavras(['am', 'nov', 'dia'])
+#print(caracteristicasfrases)
 
-basecompletatreinamento = nltk.classify.apply_features(extratorpalavras, frasescomstemmingtreinamento)
+basecompletatreinamento = nltk.classify.apply_features(extratorpalavras, frasescomstemmingtreinamento) # Monta a tabela base de dados - classe
 basecompletateste = nltk.classify.apply_features(extratorpalavras, frasescomstemmingteste)
-#print(basecompleta[15])
+#print(basecompleta)
 
-# constroi a tabela de probabilidade
+# Constrói a tabela de probabilidade Naive Bayes
 classificador = nltk.NaiveBayesClassifier.train(basecompletatreinamento)
-print(classificador.labels())
-#print(classificador.show_most_informative_features(20))
+#print(classificador.labels())
+#print(classificador.show_most_informative_features())
 
-print(nltk.classify.accuracy(classificador, basecompletateste))
+#print(nltk.classify.accuracy(classificador, basecompletateste))
 
+# Função par aplicar o stemmer em  frases quando for utilizar o Naive Bayes sem considerar as stop words
+def aplicastemmernaivebaies(texto):
+    testestemming = []
+    stemmer = nltk.stem.RSLPStemmer()
+    for (palavras) in teste.split():
+        comstem = [p for p in palavras.split()]
+        testestemming.append(str(stemmer.stem(comstem[0])))
+    return testestemming
+
+# Imprime quais frases apresentam erros de classificação, onde é uma emoção, mas o algorítmo diz ser outro
 erros = []
 for (frase, classe) in basecompletateste:
     #print(frase)
@@ -489,47 +497,29 @@ for (frase, classe) in basecompletateste:
     if resultado != classe:
         erros.append((classe, resultado, frase))
 #for (classe, resultado, frase) in erros:
-#    print(classe, resultado, frase)
+    #print(classe, resultado, frase)
 
 from nltk.metrics import ConfusionMatrix
-esperado = []
-previsto = []
+resultadoesperado = []
+resultadoprevisto = []
 for (frase, classe) in basecompletateste:
     resultado = classificador.classify(frase)
-    previsto.append(resultado)
-    esperado.append(classe)
+    resultadoprevisto.append(resultado)
+    resultadoesperado.append(classe)
 
-#esperado = 'alegria alegria alegria alegria medo medo surpresa surpresa'.split()
-#previsto = 'alegria alegria medo surpresa medo medo medo surpresa'.split()
-matriz = ConfusionMatrix(esperado, previsto)
+matriz = ConfusionMatrix(resultadoesperado, resultadoprevisto)
+
+teste = input("Digite a Frase: ")
 print(matriz)
 
-# 1. Cenário
-# 2. Número de classes - 16%
-# 3. ZeroRules - 21,05%
-
-teste = 'eu sinto amor por voce'
-testestemming = []
-stemmer = nltk.stem.RSLPStemmer()
-for (palavrastreinamento) in teste.split():
-    comstem = [p for p in palavrastreinamento.split()]
-    testestemming.append(str(stemmer.stem(comstem[0])))
+testestemming = aplicastemmernaivebaies(teste)
 #print(testestemming)
 
 novo = extratorpalavras(testestemming)
 #print(novo)
+print(classificador.classify(novo)) # Mostra a label da emoção que a frase é
 
-#print(classificador.classify(novo))
+# Mostra a probabilidade de ser cada emoção a partir dos cálculos do algorítmo Naive Bayes
 distribuicao = classificador.prob_classify(novo)
-#for classe in distribuicao.samples():
-#    print("%s: %f" % (classe, distribuicao.prob(classe)))
-
-
-
-
-
-
-
-
-
-
+for classe in distribuicao.samples():
+    print("%s : %f" %(classe, distribuicao.prob(classe)))
