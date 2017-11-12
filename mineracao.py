@@ -26,6 +26,8 @@ base = [('eu sou admirada por muitos','alegria'),
 
 basetreinamento = [
 
+
+
 ('você e abominável','desgosto'),
 ('abomino a maneira como você age','desgosto'),
 ('estou adoentado','desgosto'),
@@ -509,17 +511,29 @@ for (frase, classe) in basecompletateste:
 
 matriz = ConfusionMatrix(resultadoesperado, resultadoprevisto)
 
-teste = input("Digite a Frase: ")
-print(matriz)
+print("Bem vindo ao Sistema de Inferência de Emoções, digite uma frase abaixo que inferiremos qual emoção está contida, provavelmente nessa frase. Se quiser sair da aplicação, digite sair")
 
-testestemming = aplicastemmernaivebaies(teste)
-#print(testestemming)
+while(1):
+    print("\n")
+    teste = input("Digite a Frase que quer analisar: ")
+    print("\n")
 
-novo = extratorpalavras(testestemming)
-#print(novo)
-print(classificador.classify(novo)) # Mostra a label da emoção que a frase é
+    if teste == "sair":
+        break;
 
-# Mostra a probabilidade de ser cada emoção a partir dos cálculos do algorítmo Naive Bayes
-distribuicao = classificador.prob_classify(novo)
-for classe in distribuicao.samples():
-    print("%s : %f" %(classe, distribuicao.prob(classe)))
+    testestemming = aplicastemmernaivebaies(teste)
+    #print(testestemming)
+
+    novo = extratorpalavras(testestemming)
+    #print(novo)
+    print("Sentimento:", classificador.classify(novo)) # Mostra a label da emoção que a frase é
+    print("\n")
+
+    # Mostra a probabilidade de ser cada emoção a partir dos cálculos do algorítmo Naive Bayes
+    print("Tabela de probabilidade:")
+    distribuicao = classificador.prob_classify(novo)
+    for classe in distribuicao.samples():
+        print("%s : %f" %(classe, distribuicao.prob(classe)))
+    print("\n")
+    print("Matriz de confusão:")
+    print(matriz)
