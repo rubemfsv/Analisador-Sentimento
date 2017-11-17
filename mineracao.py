@@ -534,6 +534,5 @@ while(1):
     distribuicao = classificador.prob_classify(novo)
     for classe in distribuicao.samples():
         print("%s : %f" %(classe, distribuicao.prob(classe)))
-    print("\n")
-    print("Matriz de confusão:")
-    print(matriz)
+    #print("\n")#    print("Matriz de confusão:")
+    #print(matriz)
